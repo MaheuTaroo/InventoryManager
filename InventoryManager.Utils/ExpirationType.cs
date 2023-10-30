@@ -1,6 +1,6 @@
 ﻿namespace InventoryManager.Utils
 {
-    internal enum ExpirationType
+    public enum ExpirationType
     {
         Permanent = 0,
         PreferablyBefore

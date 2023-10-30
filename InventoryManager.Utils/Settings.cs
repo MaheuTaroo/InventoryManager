@@ -1,11 +1,14 @@
-﻿using System.Data.Common;
+﻿using MySql.Data.MySqlClient;
 
 namespace InventoryManager.Utils
 {
     public class Settings
     {
-        internal IDataSource? source;
+        private IDataSource? src;
 
-        public Settings() { }
+        public Settings(IDataSource source) 
+        {
+            src = source;
+        }
     }
 }

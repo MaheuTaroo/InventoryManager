@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace InventoryManager.Utils
 {
-    internal interface IDataSource : IDisposable
+    public interface IDataSource
     {
         public bool Connect(string link);
         public bool Disconnect();
-        public bool writeRow(ElementData value);
-        public ElementData readRow(int id);
-        public bool updateRow(int id, ElementData value);
-        public bool deleteRow(int id);
+        public bool WriteRow(ElementData value);
+        public ElementData ReadRow(int id);
+        public bool UpdateRow(int id, ElementData value);
+        public bool DeleteRow(int id);
     }
 }

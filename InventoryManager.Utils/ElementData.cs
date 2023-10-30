@@ -1,6 +1,6 @@
 ﻿namespace InventoryManager.Utils
 {
-    internal abstract class ElementData : IDisposable, IEquatable<ElementData>
+    public abstract class ElementData : IDisposable, IEquatable<ElementData>
     {
         public const ElementData EMPTY = null;
         protected bool isDisposed;

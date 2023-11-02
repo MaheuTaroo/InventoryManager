@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace InventoryManager.Utils
+﻿namespace InventoryManager.Utils
 {
     public interface IDataSource
     {
@@ -12,7 +6,7 @@ namespace InventoryManager.Utils
         public bool Disconnect();
         public bool WriteRow(ElementData value);
         public ElementData ReadRow(int id);
-        public bool UpdateRow(int id, ElementData value);
+        public bool UpdateRow(ElementData value);
         public bool DeleteRow(int id);
     }
 }

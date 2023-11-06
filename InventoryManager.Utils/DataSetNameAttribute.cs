@@ -1,11 +1,11 @@
 ﻿namespace InventoryManager.Utils
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class FieldNameAttribute : Attribute
+    public class DataSetNameAttribute : Attribute
     {
         public readonly string Field;
 
-        public FieldNameAttribute(string field)
+        public DataSetNameAttribute(string field)
         {
             Field = field;
         }

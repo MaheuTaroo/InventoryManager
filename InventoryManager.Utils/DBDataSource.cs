@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Data;
+using System.Reflection;
 
 namespace InventoryManager.Utils
 {
@@ -29,13 +30,13 @@ namespace InventoryManager.Utils
 
         public string Table { private get; set; } 
 
-        private bool WriteToDB(ElementData value, bool isInserting)
+        private bool WriteToDB(ref ElementData value, bool isInserting)
         {
             MySqlCommand cmd = new MySqlCommand($"{(isInserting ? "insert" : "update")} into @table (@elements) values (@values);", Connection);
 
             cmd.Parameters.AddWithValue("@table", Table);
-            cmd.Parameters.AddWithValue("@elements", value.GetType().GetFields()
-                                                          .Select(info => info.Name)
+            cmd.Parameters.AddWithValue("@elements", value.GetType().GetFields().ToList()
+                                                          .ConvertAll(info => (info.GetCustomAttribute(typeof(FieldNameAttribute), false) as FieldNameAttribute)!.Field)
                                                           .Aggregate((el1, el2) => el1 + ", " + el2));
             cmd.Parameters.AddWithValue("@values", value.GetType().GetFields()
                                                         .Select(info => info.GetValue(info.Name)!.ToString()!)
@@ -67,9 +68,9 @@ namespace InventoryManager.Utils
             return true;
         }
 
-        public bool WriteRow(ElementData value)
+        public bool WriteRow(ref ElementData value)
         {
-            return WriteToDB(value, true);
+            return WriteToDB(ref value, true);
         }
 
         public ElementData ReadRow(int id)
@@ -89,9 +90,9 @@ namespace InventoryManager.Utils
             }
         }
 
-        public bool UpdateRow(ElementData value)
+        public bool UpdateRow(ref ElementData value)
         {
-            return WriteToDB(value, false);
+            return WriteToDB(ref value, false);
         }
 
         public bool DeleteRow(int id)

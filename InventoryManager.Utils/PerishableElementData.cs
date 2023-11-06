@@ -2,13 +2,14 @@
 {
     public class PerishableElementData : ElementData
     {
-        [FieldName("ExpirationDate")]
-        public DateTime ExpirationDate { get; }
+        [FieldName("ExpiresOn")]
+        [DataSetName("Expiration Date")]
+        public DateTime Expiration { get; }
 
         public PerishableElementData(int id, string name, int units, int quantity, DateTime expDate) : 
                base(id, name, units, quantity)
         {
-            ExpirationDate = expDate;
+            Expiration = expDate;
         }
     }
 }

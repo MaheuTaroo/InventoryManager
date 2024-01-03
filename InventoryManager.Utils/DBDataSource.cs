@@ -1,42 +1,49 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System.Collections.ObjectModel;
 using System.Data;
-using System.Reflection;
+using MySql.Data.MySqlClient;
 
 namespace InventoryManager.Utils
 {
     public class DBDataSource : IDataSource, IDisposable
     {
-        private MySqlConnection Connection
+        private ReadOnlyCollection<string> Tables = new ReadOnlyCollection<string>(new List<string>() { "items", "restock_hist", "sale_items", "unit_types" });
+
+        private MySqlConnection? _conn;
+        public MySqlConnection? Connection
         {
             get
             {
-                return Connection;
+                return _conn;
             }
-            set
+            private set
             {
                 if (value == null || !value.Ping()) return;
 
-                if (Connection != null)
+                if (_conn != null)
                 {
-                    Connection.CancelQuery(0);
-                    Connection.Close();
-                    Connection.Dispose();
+                    _conn.CancelQuery(0);
+                    _conn.Close();
+                    _conn.Dispose();
                 }
 
-                Connection = value;
-                Connection.Open();
+                _conn = value;
+                _conn.Open();
             }
         }
 
-        public string Table { private get; set; } 
+        public string Table { private get; set; } = "";
+
+        public bool CanConnect() => Connection?.Ping() ?? false;
 
         private bool WriteToDB(ref ElementData value, bool isInserting)
         {
+            if (Connection == null) return false;
+
             MySqlCommand cmd = new MySqlCommand($"{(isInserting ? "insert" : "update")} into @table (@elements) values (@values);", Connection);
 
             cmd.Parameters.AddWithValue("@table", Table);
             cmd.Parameters.AddWithValue("@elements", value.GetType().GetFields().ToList()
-                                                          .ConvertAll(info => (info.GetCustomAttribute(typeof(FieldNameAttribute), false) as FieldNameAttribute)!.Field)
+                                                          .ConvertAll(info => info.Name)
                                                           .Aggregate((el1, el2) => el1 + ", " + el2));
             cmd.Parameters.AddWithValue("@values", value.GetType().GetFields()
                                                         .Select(info => info.GetValue(info.Name)!.ToString()!)
@@ -46,22 +53,22 @@ namespace InventoryManager.Utils
             return cmd.ExecuteNonQuery() != 0;
         }
 
-        public DBDataSource(string ipAddr, int port, string user, string pass, string db, string table)
+        public DBDataSource(string ipAddr, int port, string user, string pass, string db)
         {
             Connect($"server={ipAddr}:{port};uid={user};pwd={pass};database={db}");
-            Table = table;
         }
 
         public bool Connect(string link)
         {
-            MySqlConnection tmp = Connection;
-            Connection = new MySqlConnection(link);
-            return Connection.Equals(tmp);
+            if (Connection != null && Connection.ConnectionString != link)
+                Connection = new MySqlConnection(link);
+
+            return Connection?.State == ConnectionState.Open;
         }
 
         public bool Disconnect()
         {
-            if (Connection.State != ConnectionState.Open) return false;
+            if (Connection == null || Connection.State != ConnectionState.Open) return false;
 
             Connection.CancelQuery(0);
             Connection.Close();
@@ -75,29 +82,25 @@ namespace InventoryManager.Utils
 
         public ElementData ReadRow(int id)
         {
-            MySqlCommand cmd = new MySqlCommand("select * from @table where ID = @id;", Connection);
+            if (Connection == null || !IsValidTableName(Table)) return ElementData.EMPTY;
+
+            using MySqlCommand cmd = new MySqlCommand("select * from @table where ID = @id;", Connection);
             cmd.Parameters.AddWithValue("@table", Table);
             cmd.Parameters.AddWithValue("@id", id);
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                if (reader.HasRows) return ElementData.EMPTY;
-                reader.Read();
-                return new PerishableElementData(int.Parse(reader[0].ToString()!),
-                                                 reader[1].ToString()!,
-                                                 int.Parse(reader[2].ToString()!),
-                                                 int.Parse(reader[3].ToString()!),
-                                                 DateTime.Parse(reader[4].ToString()!));
-            }
+            using MySqlDataReader reader = cmd.ExecuteReader();
+            if (!reader.HasRows) return ElementData.EMPTY;
+
+            reader.Read();
+            return ElementData.FromReader(Table, reader);
         }
 
-        public bool UpdateRow(ref ElementData value)
-        {
-            return WriteToDB(ref value, false);
-        }
+        private bool IsValidTableName(string table) => Tables.Contains(table);
+
+        public bool UpdateRow(ref ElementData value) => WriteToDB(ref value, false);
 
         public bool DeleteRow(int id)
         {
-            if (Connection.State == ConnectionState.Closed) return false;
+            if (Connection != null && Connection.State == ConnectionState.Closed) return false;
 
             MySqlCommand cmd = new MySqlCommand("delete from @table where ID = @id;", Connection);
             cmd.Parameters.AddWithValue("@table", Table);
@@ -109,6 +112,7 @@ namespace InventoryManager.Utils
 
         public void Dispose()
         {
+            if (Connection == null) return;
             if (Connection.State == ConnectionState.Open) Connection.Close();
             Connection.Dispose();
         }

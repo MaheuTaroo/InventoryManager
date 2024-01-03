@@ -1,38 +1,40 @@
-﻿namespace InventoryManager.Utils
+﻿using MySql.Data.MySqlClient;
+
+namespace InventoryManager.Utils
 {
     public abstract class ElementData : IEquatable<ElementData>
     {
         public const ElementData EMPTY = null;
 
-        [FieldName("ID")]
         [DataSetName("ID")]
         public int ID { get; }
 
-        [FieldName("Designation")]
-        [DataSetName("Designation")]
-        public string Descriptor { get; }
+        protected ElementData(int id)
+        {
+            ID = id;
+        }
 
-        [FieldName("Units")]
-        [DataSetName("Units in Item")]
-        public int AmountPerItem { get; }
-
-        [FieldName("Quantity")]
-        [DataSetName("Quantity")]
-        public int Quantity { get; }
+        public static ElementData FromReader(string table, MySqlDataReader reader) 
+        {
+            return table switch
+            {
+                "items" => new PerishableItemData(reader.GetInt32(0),
+                                                  reader.GetString(1),
+                                                  int.Parse(reader.GetString(2)),
+                                                  UnitTypes.From(reader.GetInt32(3)),
+                                                  reader.GetInt32(4),
+                                                  reader.GetMySqlDateTime(5).GetDateTime()),
+                "restock_hist" => new RestockHistData(reader.GetInt32(0),
+                                                      reader.GetDateTime(1)),
+                _ => EMPTY
+            };
+        }
 
         public virtual bool Equals(ElementData? other)
         {
-            if (this == EMPTY && other == EMPTY) return true;
+            if (other == null) return this == null;
 
-            return ID == other!.ID;
-        }
-
-        protected ElementData(int id, string name, int units, int quantity)
-        {
-            ID = id;
-            Descriptor = name;
-            AmountPerItem = units;
-            Quantity = quantity;
+            return ID == other.ID;
         }
     }
 }

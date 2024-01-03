@@ -6,10 +6,5 @@ namespace InventoryManager.UI
         {
             InitializeComponent();
         }
-
-        private void configureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

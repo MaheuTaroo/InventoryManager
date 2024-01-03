@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
             btnLogin = new Button();
             tableLayoutPanel1 = new TableLayoutPanel();
             tableLayoutPanel4 = new TableLayoutPanel();
@@ -180,7 +179,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(359, 336);
             Controls.Add(tableLayoutPanel1);
-            Icon = (Icon)resources.GetObject("$this.Icon");
+            Icon = InventoryManager.UI.Properties.Resources.favicon;
             MaximizeBox = false;
             Name = "Login";
             StartPosition = FormStartPosition.CenterScreen;

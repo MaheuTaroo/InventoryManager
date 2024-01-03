@@ -1,3 +1,5 @@
+using InventoryManager.Utils;
+
 namespace InventoryManager.UI
 {
     internal static class Program
@@ -12,6 +14,10 @@ namespace InventoryManager.UI
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Login());
+
+            Utils.UtilData.Source = new DBDataSource("127.0.0.1", 3306, "root", "", "inventory_medical", "items");
+
+            Application.Run(new Main());
         }
     }
 }

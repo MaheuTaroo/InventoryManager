@@ -58,19 +58,19 @@
             // addToolStripMenuItem1
             // 
             addToolStripMenuItem1.Name = "addToolStripMenuItem1";
-            addToolStripMenuItem1.Size = new Size(107, 22);
+            addToolStripMenuItem1.Size = new Size(180, 22);
             addToolStripMenuItem1.Text = "Add";
             // 
             // deleteToolStripMenuItem
             // 
             deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            deleteToolStripMenuItem.Size = new Size(107, 22);
+            deleteToolStripMenuItem.Size = new Size(180, 22);
             deleteToolStripMenuItem.Text = "Delete";
             // 
             // editToolStripMenuItem
             // 
             editToolStripMenuItem.Name = "editToolStripMenuItem";
-            editToolStripMenuItem.Size = new Size(107, 22);
+            editToolStripMenuItem.Size = new Size(180, 22);
             editToolStripMenuItem.Text = "Edit";
             // 
             // configureToolStripMenuItem
@@ -78,7 +78,6 @@
             configureToolStripMenuItem.Name = "configureToolStripMenuItem";
             configureToolStripMenuItem.Size = new Size(61, 20);
             configureToolStripMenuItem.Text = "Settings";
-            configureToolStripMenuItem.Click += configureToolStripMenuItem_Click;
             // 
             // dataGridView1
             // 
